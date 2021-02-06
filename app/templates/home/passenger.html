@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{ passenger.Name }}{% endblock %}
+{% block head %}
+    <script src="{{ url_for('static', filename='echarts/echarts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <table class="table">
+        <tbody>
+        {% for k,v in dict(passenger).items() %}
+            <tr>
+                <th>{{ k }}</th>
+                <td>{{ v }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div id="passenger" style="height: 400px;width: 600px"></div>
+{% endblock %}
+{% block js_tail %}
+    <script>
+        echarts.init(document.getElementById('passenger')).setOption({
+            title: {
+                text: '乘客属性',
+                left: 'center'
+            },
+            tooltip: {},
+            radar: {
+                indicator: [
+                    {% for k,v in passenger_max.items() %}
+                        {name: '{{k}}', max: {{v}}},
+                    {% endfor %}
+                ]
+            },
+            series: [{
+                type: 'radar',
+                data: [{
+                    value: {{ passenger_data }},
+                    name: '属性'
+                }]
+            }]
+        });
+    </script>
+{% endblock %}

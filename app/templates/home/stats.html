@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}统计{% endblock %}
+{% block head %}
+    <script src="{{ url_for('static', filename='echarts/echarts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <h1 class="text-center">泰坦尼克号之灾</h1>
+    <div class="row">
+        <div class="col" id="embark" style="height: 400px"></div>
+        <div class="col" id="survive" style="height: 400px"></div>
+    </div>
+    <div class="row">
+        <div class="col" id="pclass" style="height: 400px"></div>
+        <div class="col" id="sex" style="height: 400px"></div>
+    </div>
+    <div class="row">
+        <div class="col" id="sibsp" style="height: 400px"></div>
+        <div class="col" id="parch" style="height: 400px"></div>
+    </div>
+    <div class="row">
+        <div class="col" id="age" style="height: 400px"></div>
+        <div class="col" id="fare" style="height: 400px"></div>
+    </div>
+    <div id="ticket" style="height: 400px"></div>
+{% endblock %}
+{% block js_tail %}
+    <script>
+        function pie(text, data) {
+            return {
+                title: {
+                    text: text,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}:{c}({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                },
+                series: [{
+                    type: 'pie',
+                    radius: '50%',
+                    label: {
+                        normal: {
+                            show: true,
+                            formatter: '{b}:{c}({d}%)'
+                        }
+                    },
+                    data: data
+                }]
+            }
+        }
+
+        function bar(text, x, y) {
+            return {
+                title: {
+                    text: text,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    type: 'category',
+                    data: x,
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                }],
+                yAxis: [{
+                    type: 'value'
+                }],
+                series: [{
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: y
+                }]
+            };
+        }
+
+        function Line(text, x, y) {
+            return {
+                title: {
+                    text: text,
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                },
+                xAxis: {
+                    type: 'category',
+                    data: x
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    data: y,
+                    type: 'line',
+                    {#smooth: true#}
+                }]
+            };
+        }
+
+        echarts.init(document.getElementById('embark')).setOption(pie('港口编号', [
+            {% for k,v in embarks.items() %}
+                {value: {{ v }}, name: '{{ k }}'},
+            {% endfor %}
+        ]));
+        echarts.init(document.getElementById('survive')).setOption(pie('总体幸存情况', [
+            {% for k,v in survive.items() %}
+                {value: {{ v }}, name: '{{ k }}'},
+            {% endfor %}
+        ]));
+        echarts.init(document.getElementById('pclass')).setOption(pie('乘客等级分布', [
+            {% for k,v in pclass.items() %}
+                {value: {{ v }}, name: '{{ k }}'},
+            {% endfor %}
+        ]));
+        echarts.init(document.getElementById('sex')).setOption(pie('乘客性别分布', [
+            {% for k,v in sex.items() %}
+                {value: {{ v }}, name: '{{ k }}'},
+            {% endfor %}
+        ]));
+        echarts.init(document.getElementById('sibsp')).setOption(bar('乘客兄弟姐妹个数情况', {{ sibsp[0] }}, {{ sibsp[1] }}));
+        echarts.init(document.getElementById('parch')).setOption(bar('乘客父母与小孩个数情况', {{ parch[0] }}, {{ parch[1] }}));
+        echarts.init(document.getElementById('age')).setOption(Line('乘客年龄分布情况', {{ age[0] }}, {{ age[1] }}));
+        echarts.init(document.getElementById('fare')).setOption(Line('乘客票价分布情况', {{ fare[0] }}, {{ fare[1] }}));
+        echarts.init(document.getElementById('ticket')).setOption({
+            title: {
+                text: '乘客船票信息分布情况',
+                left: 'center'
+            },
+            toolbox: {
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: false
+                    },
+                    saveAsImage: {
+                        pixelRatio: 2
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                bottom: 90
+            },
+            dataZoom: [{
+                type: 'inside'
+            }, {
+                type: 'slider'
+            }],
+            xAxis: {
+                type: 'category',
+                data: {{ ticket[0]|tojson }},
+                silent: false,
+                splitLine: {
+                    show: false
+                },
+                splitArea: {
+                    show: false
+                }
+            },
+            yAxis: {
+                splitArea: {
+                    show: false
+                }
+            },
+            series: [{
+                type: 'bar',
+                data: {{ ticket[1] }},
+                large: true
+            }]
+        });
+    </script>
+{% endblock %}

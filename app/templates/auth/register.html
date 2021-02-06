@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}注册{% endblock %}
+{% block content %}
+    <form action="{{ url_for('auth.register') }}" method="post">
+        <div class="form-group">
+            <label for="email">邮箱:</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter email" required="required" name="email">
+        </div>
+        <div class="form-group">
+            <label for="username">用户名:</label>
+            <input type="text" class="form-control" id="username" placeholder="Enter username" required="required" name="username">
+        </div>
+        <div class="form-group">
+            <label for="password">密码:</label>
+            <input type="password" class="form-control" id="password" placeholder="Enter password" required="required" name="password">
+        </div>
+        <div class="form-group">
+            <label for="password_check">密码确认:</label>
+            <input type="password" class="form-control" id="password_check" placeholder="Enter password" required="required">
+        </div>
+        <span id="check"></span>
+        <p class="text-danger">{{ error }}</p>
+        <button type="submit" class="btn btn-primary" id="submit">提交</button>
+    </form>
+{% endblock %}
+{% block js_tail %}
+    <script>
+        document.getElementById('password_check').addEventListener('blur', check_password);
+
+        function check_password() {
+            if ($('#password').val() !== $('#password_check').val()) {
+                $('#check').html('<p style="color: red">两次密码不一致!</p>').show();
+                $('button').attr('disabled', true);
+            } else {
+                $('#check').text('').show();
+                $('button').attr('disabled', false);
+            }
+        }
+    </script>
+{% endblock %}
